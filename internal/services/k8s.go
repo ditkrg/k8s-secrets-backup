@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path"
 	"strings"
 
 	"github.com/RocketChat/k8s-secrets-backup/internal/options"
@@ -140,7 +141,7 @@ func (k *K8sService) GetSecrets(fileName string, opts *options.Options) error {
 		Items: secrets.Items,
 	}
 
-	newFile, err := os.Create(fileName)
+	newFile, err := os.Create(path.Join(opts.BackupDir, fileName))
 	if err != nil {
 		return err
 	}

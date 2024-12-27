@@ -85,7 +85,7 @@ func main() {
 	}
 
 	// Encrypt the secrets backup file
-	if err := encryptSecretsFile(opts.AgePublicKey, fileName, encryptedFileName); err != nil {
+	if err := encryptSecretsFile(opts, fileName, encryptedFileName); err != nil {
 		log.Fatal().Err(err).Msg("Failed to encrypt secrets file")
 	}
 
@@ -102,19 +102,19 @@ func main() {
 	// #############################
 	// Upload to backup s3 bucket the encrypted file
 	// #############################
-	if err = s3Service.UploadFile(opts.S3.BucketName, s3key, encryptedFileName); err != nil {
+	if err = s3Service.UploadFile(&opts, s3key, encryptedFileName); err != nil {
 		log.Fatal().Err(err).Msg("Failed to upload file to S3")
 	}
 
 	log.Info().Msgf("File uploaded successfully!")
 }
 
-func encryptSecretsFile(ageRecipientPublicKey string, fileName string, encryptedFile string) error {
+func encryptSecretsFile(opts options.Options, fileName string, encryptedFile string) error {
 
 	// #############################
 	// Open the input file for reading
 	// #############################
-	in, err := os.Open(fileName)
+	in, err := os.Open(path.Join(opts.BackupDir, fileName))
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to open file for reading")
 	}
@@ -123,7 +123,7 @@ func encryptSecretsFile(ageRecipientPublicKey string, fileName string, encrypted
 	// #############################
 	// Create the output file for writing the encrypted content
 	// #############################
-	out, err := os.Create(encryptedFile)
+	out, err := os.Create(path.Join(opts.BackupDir, encryptedFile))
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to create file for writing")
 	}
@@ -132,7 +132,7 @@ func encryptSecretsFile(ageRecipientPublicKey string, fileName string, encrypted
 	// #############################
 	// Create an Age encryption writer
 	// #############################
-	recipient, err := age.ParseX25519Recipient(ageRecipientPublicKey)
+	recipient, err := age.ParseX25519Recipient(opts.AgePublicKey)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to parse recipient public key")
 	}

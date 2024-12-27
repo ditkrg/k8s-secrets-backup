@@ -12,6 +12,7 @@ type Options struct {
 	ClusterInfo ClusterInfo `env:",prefix=CLUSTER__"`
 
 	AgePublicKey string `env:"AGE_PUBLIC_KEY"`
+	BackupDir    string `env:"BACKUP_DIR"`
 }
 
 func (opts *Options) Validate() error {
@@ -42,7 +43,7 @@ func (opts *Options) Validate() error {
 	// validate the age recipient public key
 	// #############################
 	if opts.AgePublicKey == "" {
-		return errors.New("AGE_RECIPIENT_PUBLIC_KEY is required")
+		return errors.New("AGE_PUBLIC_KEY is required")
 	}
 
 	log.Info().Msg("Options are valid")

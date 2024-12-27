@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"os"
+	"path"
 
 	"github.com/RocketChat/k8s-secrets-backup/internal/options"
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -47,12 +48,12 @@ func NewS3Service(opts *options.S3) (*S3Service, error) {
 	return &S3Service{Client: client}, nil
 }
 
-func (s *S3Service) UploadFile(bucket string, s3Key string, encryptedFileName string) error {
+func (s *S3Service) UploadFile(opts *options.Options, s3Key string, encryptedFileName string) error {
 
 	// #############################
 	// Open the file for reading
 	// #############################
-	file, err := os.Open(encryptedFileName)
+	file, err := os.Open(path.Join(opts.BackupDir, encryptedFileName))
 	if err != nil {
 		return err
 	}
@@ -62,7 +63,7 @@ func (s *S3Service) UploadFile(bucket string, s3Key string, encryptedFileName st
 	// Upload the file to S3
 	// #############################
 	_, err = s.Client.PutObject(context.TODO(), &s3.PutObjectInput{
-		Bucket: aws.String(bucket),
+		Bucket: aws.String(opts.S3.BucketName),
 		Key:    aws.String(s3Key),
 		Body:   file,
 	})
