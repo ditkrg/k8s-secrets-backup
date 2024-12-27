@@ -10,7 +10,7 @@ Another less important note: Age encryption is done to an ASCII-only "armored" e
 #### :ballot_box_with_check: Environment variables (required, except if explicity says optional)
 | Name                               | example                                        | help                                                                              |
 | ---------------------------------- | ---------------------------------------------- | --------------------------------------------------------------------------------- |
-| AGE_RECIPIENT_PUBLIC_KEY           | "age435fgañdfgjñdsflgjgadf"                    | Age public key matching your private key for decrypt                              |
+| AGE_PUBLIC_KEY                     | "age435fgañdfgjñdsflgjgadf"                    | Age public key matching your private key for decrypt                              |
 | S3__BUCKET_NAME                    | "bucket-name"                                  | AWS s3 bucket name to upload the backups                                          |
 | S3__PATH                           | "path"                                         | AWS S3 path to upload the backups to                                              |
 | S3__REGION                         | "us-east-2"                                    | AWS s3 region name                                                                |
@@ -48,31 +48,32 @@ spec:
             image: rocketchat/k8s-secrets-backup
             imagePullPolicy: Always
             env:
-            - name: NAMESPACE
+            - name: SECRET__NAMESPACE
               value: kube-system
-            - name: LABEL_KEY
+            - name: SECRET__LABEL_KEY
               value: sealedsecrets.bitnami.com/sealed-secrets-key
-            - name: LABEL_VALUE
+            - name: SECRET__LABEL_VALUE
               value: active
-            - name: BUCKET_NAME
+            - name: S3__BUCKET_NAME
               value: secretsbackups.your.domain
-            - name: S3_FOLDER
-              value: sealed_secrets_keys/
-            - name: S3_REGION
+            - name: S3__PATH
+              value: sealed_secrets_keys
+            - name: S3__REGION
               value: us-east-2
             - name: AGE_PUBLIC_KEY
               value: age435fgañdfgjñdsflgjgadf
-            - name: AWS_ACCESS_KEY_ID
+            - name: CLUSTER__NAME
+              value: my_cluster
+            - name: S3__ACCESS_KEY
               valueFrom:
                 secretKeyRef:
                   key: awsAccessKeyID
                   name: sealed-secrets-keys-sentinel-secret
-            - name: AWS_SECRET_ACCESS_KEY
+            - name: S3__SECRET_KEY
               valueFrom:
                 secretKeyRef:
                   key: awsSecretAccessKey
                   name: sealed-secrets-keys-sentinel-secret
-            command: ["/app/k8s-secrets-backup"]
             resources:
               limits:
                 cpu: "1"
@@ -92,7 +93,7 @@ metadata:
   namespace: kube-system
 rules:
 - apiGroups: [""]
-  resources: ["secrets", "configmaps"]
+  resources: ["secrets", "configmaps"] # configmaps are needed if you provide the cluster name in a configmap
   verbs: ["list", "get"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -141,6 +142,7 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
 
 ---
+# only needed if you provide the cluster name in a configmap
 apiVersion: v1
 kind: ConfigMap
 metadata:

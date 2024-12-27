@@ -85,7 +85,7 @@ func main() {
 	}
 
 	// Encrypt the secrets backup file
-	if err := encryptSecretsFile(opts.AgeRecipientPublicKey, fileName, encryptedFileName); err != nil {
+	if err := encryptSecretsFile(opts.AgePublicKey, fileName, encryptedFileName); err != nil {
 		log.Fatal().Err(err).Msg("Failed to encrypt secrets file")
 	}
 

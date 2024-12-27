@@ -11,7 +11,7 @@ type Options struct {
 	Secret      K8sSecret   `env:",prefix=SECRET__"`
 	ClusterInfo ClusterInfo `env:",prefix=CLUSTER__"`
 
-	AgeRecipientPublicKey string `env:"AGE_RECIPIENT_PUBLIC_KEY"`
+	AgePublicKey string `env:"AGE_PUBLIC_KEY"`
 }
 
 func (opts *Options) Validate() error {
@@ -41,7 +41,7 @@ func (opts *Options) Validate() error {
 	// #############################
 	// validate the age recipient public key
 	// #############################
-	if opts.AgeRecipientPublicKey == "" {
+	if opts.AgePublicKey == "" {
 		return errors.New("AGE_RECIPIENT_PUBLIC_KEY is required")
 	}
 
